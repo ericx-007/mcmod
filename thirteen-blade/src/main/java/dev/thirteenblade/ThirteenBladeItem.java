@@ -26,9 +26,9 @@ public final class ThirteenBladeItem extends SwordItem {
         public Ingredient getRepairIngredient() { return Ingredient.EMPTY; }
     };
 
-    public ThirteenBladeItem() {
+    public ThirteenBladeItem(boolean advanced) {
         // Player base (1) + material (2) + sword (3) = 6; 4 - 2.4 = 1.6 attacks/s.
-        super(MATERIAL, 3, -2.4f, new Settings().maxCount(1).fireproof().rarity(Rarity.RARE));
+        super(MATERIAL, advanced ? 9 : 3, -2.4f, new Settings().maxCount(1).fireproof().rarity(advanced ? Rarity.EPIC : Rarity.RARE));
     }
 
     @Override public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) { return true; }
@@ -48,21 +48,17 @@ public final class ThirteenBladeItem extends SwordItem {
         lines.add(Text.translatable("tooltip.thirteenblade.unbreakable").formatted(Formatting.AQUA));
         lines.add(Text.translatable("tooltip.thirteenblade.level", BladeData.level(stack),
                 BladeData.kills(stack)).formatted(Formatting.LIGHT_PURPLE));
-        lines.add(Text.translatable("tooltip.thirteenblade.bonus", number(6 + BladeData.damageBonus(stack)),
+        lines.add(Text.translatable("tooltip.thirteenblade.bonus", number(BladeData.baseAttack(stack) + BladeData.damageBonus(stack)),
                 number(BladeData.damageBonus(stack))).formatted(Formatting.GRAY));
         lines.add(Text.translatable("tooltip.thirteenblade.carried_health", number(BladeData.healthBonus(stack)))
                 .formatted(Formatting.GREEN));
+        lines.add(Text.translatable(BladeData.advanced(stack) ? "tooltip.thirteenblade.advanced" : "tooltip.thirteenblade.base_cap").formatted(Formatting.GOLD));
+        lines.add(Text.translatable("tooltip.thirteenblade.toughness", number(BladeData.toughnessBonus(stack)), BladeData.soulCount(stack)).formatted(Formatting.GRAY));
         int remaining = Progression.remaining(BladeData.kills(stack), config);
-        lines.add(Text.translatable("tooltip.thirteenblade.next", remaining)
+        lines.add(Text.translatable(!BladeData.advanced(stack) && BladeData.level(stack) >= 10 ? "tooltip.thirteenblade.capped" : "tooltip.thirteenblade.next", remaining)
                 .formatted(Formatting.DARK_AQUA));
-        if (BladeData.has(stack, BladeData.HUNGER_WARD))
-            lines.add(Text.translatable("power.thirteenblade.hunger").formatted(Formatting.GREEN));
-        if (BladeData.has(stack, BladeData.NIGHT_SIGHT))
-            lines.add(Text.translatable("power.thirteenblade.night").formatted(Formatting.BLUE));
-        if (BladeData.has(stack, BladeData.SLOW_FALL))
-            lines.add(Text.translatable("power.thirteenblade.slow_fall").formatted(Formatting.AQUA));
-        if (BladeData.has(stack, BladeData.CREEPER_SHIELD))
-            lines.add(Text.translatable("power.thirteenblade.shield").formatted(Formatting.GOLD));
+        for (SoulPower power : SoulPower.values())
+            if (power.known(stack)) lines.add(Text.translatable(power.translation).formatted(Formatting.LIGHT_PURPLE));
         for (var effect : BladeData.stolenEffects(stack, System.currentTimeMillis()).values()) {
             Text duration = effect.expiresAt() < 0 ? Text.translatable("tooltip.thirteenblade.infinite")
                     : Text.translatable("tooltip.thirteenblade.seconds", Math.max(1, (effect.expiresAt() - System.currentTimeMillis() + 999) / 1000));

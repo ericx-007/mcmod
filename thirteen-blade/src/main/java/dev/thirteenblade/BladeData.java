@@ -43,7 +43,36 @@ public final class BladeData {
         NbtCompound data = read(stack);
         return data.containsUuid("Identity") ? data.getUuid("Identity").toString() : "new-sword";
     }
-    public static int level(ItemStack stack) { return Progression.level(kills(stack), ThirteenBlade.balance); }
+    public static boolean advanced(ItemStack stack) { return stack.isOf(ThirteenBlade.DRAGON_SWORD); }
+    public static double baseAttack(ItemStack stack) { return advanced(stack) ? 12 : 6; }
+    public static int level(ItemStack stack) {
+        int level = Progression.level(kills(stack), ThirteenBlade.balance);
+        return advanced(stack) ? level : Math.min(10, level);
+    }
+    public static int soulCount(ItemStack stack) {
+        return discoveries(stack).size();
+    }
+    public static double toughnessBonus(ItemStack stack) { return 2.0 * soulCount(stack); }
+
+    private static java.util.Set<String> discoveries(ItemStack stack) {
+        java.util.Set<String> result = new java.util.LinkedHashSet<>();
+        NbtList list = read(stack).getList("SoulDiscoveries", NbtElement.STRING_TYPE);
+        for (int i = 0; i < list.size(); i++) result.add(list.getString(i));
+        for (SoulPower power : SoulPower.values()) if (power.known(stack)) result.add("family:" + power.name());
+        return result;
+    }
+
+    public static boolean discover(ItemStack sword, net.minecraft.entity.LivingEntity victim) {
+        SoulPower power = SoulPower.of(victim);
+        if (power == null && victim.getType().getSpawnGroup() != net.minecraft.entity.SpawnGroup.MONSTER) return false;
+        String key = power == null ? Registries.ENTITY_TYPE.getId(victim.getType()).toString() : "family:" + power.name();
+        var entries = discoveries(sword);
+        if (!entries.add(key)) return false;
+        NbtList saved = new NbtList();
+        for (String entry : entries) saved.add(net.minecraft.nbt.NbtString.of(entry));
+        write(sword).put("SoulDiscoveries", saved);
+        return true;
+    }
     public static boolean has(ItemStack stack, String power) { return read(stack).getBoolean(power); }
     public static double damageBonus(ItemStack stack) { return level(stack) * ThirteenBlade.balance.damagePerLevel; }
     public static double healthBonus(ItemStack stack) { return level(stack) * ThirteenBlade.balance.healthPerLevel; }
@@ -105,9 +134,12 @@ public final class BladeData {
 
     public static Map<StatusEffect, StoredEffect> desiredEffects(ItemStack sword, long now) {
         Map<StatusEffect, StoredEffect> effects = stolenEffects(sword, now);
-        if (has(sword, NIGHT_SIGHT)) effects.putIfAbsent(StatusEffects.NIGHT_VISION, new StoredEffect(StatusEffects.NIGHT_VISION, 0, -1));
-        if (has(sword, SLOW_FALL)) effects.putIfAbsent(StatusEffects.SLOW_FALLING, new StoredEffect(StatusEffects.SLOW_FALLING, 0, -1));
-        if (has(sword, CREEPER_SHIELD)) effects.putIfAbsent(StatusEffects.ABSORPTION, new StoredEffect(StatusEffects.ABSORPTION, 0, -1));
+        for (SoulPower power : SoulPower.values()) {
+            if (power.effect == null || !power.known(sword)) continue;
+            StoredEffect existing = effects.get(power.effect);
+            int amp = existing == null ? power.amplifier : Math.max(power.amplifier, existing.amplifier());
+            effects.put(power.effect, new StoredEffect(power.effect, amp, -1));
+        }
         return effects;
     }
 

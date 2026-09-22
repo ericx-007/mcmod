@@ -1,6 +1,7 @@
 package dev.thirteenblade.client;
 
 import dev.thirteenblade.BladeData;
+import dev.thirteenblade.SoulPower;
 import dev.thirteenblade.BladeInventory;
 import dev.thirteenblade.ThirteenBlade;
 import dev.thirteenblade.ThirteenBladeItem;
@@ -28,6 +29,7 @@ public final class SwordChatScreen extends Screen {
     private int maxScroll;
     private int lastMessageCount;
     private boolean sidebar;
+    private int statScroll, maxStatScroll;
     private record Line(OrderedText text, int color) {}
 
     public SwordChatScreen(ItemStack sword) {
@@ -76,7 +78,7 @@ public final class SwordChatScreen extends Screen {
         input.tick();
         if (client == null || client.player == null) { close(); return; }
         ItemStack current = BladeInventory.activeSword(client.player);
-        if (!current.isOf(ThirteenBlade.SWORD) || !BladeData.identity(current).equals(swordId)) { close(); return; }
+        if (!ThirteenBlade.isSword(current) || !BladeData.identity(current).equals(swordId)) { close(); return; }
         sword = current.copy();
         send.active = !session.busy && !input.getText().isBlank() && System.currentTimeMillis() >= session.nextSendAt;
         if (session.messages.size() != lastMessageCount) { scroll = 0; lastMessageCount = session.messages.size(); }
@@ -93,6 +95,10 @@ public final class SwordChatScreen extends Screen {
     }
 
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (sidebar && mouseX >= left + 12 && mouseX < chatLeft && mouseY >= chatTop && mouseY <= bottom - 20) {
+            statScroll = Math.max(0, Math.min(maxStatScroll, statScroll - (int) (amount * 24)));
+            return true;
+        }
         if (mouseY >= chatTop && mouseY <= chatBottom && mouseX >= chatLeft && mouseX <= right - 12) {
             scroll = Math.max(0, Math.min(maxScroll, scroll + (int) (amount * 3)));
             return true;
@@ -163,17 +169,17 @@ public final class SwordChatScreen extends Screen {
                 Text.translatable("chat.thirteenblade.stats"),
                 Text.translatable("chat.thirteenblade.stat_level", BladeData.level(sword)),
                 Text.translatable("chat.thirteenblade.stat_kills", BladeData.kills(sword)),
-                Text.translatable("chat.thirteenblade.stat_damage", ThirteenBladeItem.number(6 + BladeData.damageBonus(sword))),
+                Text.translatable("chat.thirteenblade.stat_damage", ThirteenBladeItem.number(BladeData.baseAttack(sword) + BladeData.damageBonus(sword))),
                 Text.translatable("chat.thirteenblade.stat_health", ThirteenBladeItem.number(BladeData.healthBonus(sword))),
                 Text.empty(),
                 Text.translatable("chat.thirteenblade.powers"),
-                Text.translatable(BladeData.has(sword, BladeData.HUNGER_WARD) ? "power.thirteenblade.hunger" : "chat.thirteenblade.locked_zombie"),
-                Text.translatable(BladeData.has(sword, BladeData.NIGHT_SIGHT) ? "power.thirteenblade.night" : "chat.thirteenblade.locked_skeleton"),
-                Text.translatable(BladeData.has(sword, BladeData.SLOW_FALL) ? "power.thirteenblade.slow_fall" : "chat.thirteenblade.locked_spider"),
-                Text.translatable(BladeData.has(sword, BladeData.CREEPER_SHIELD) ? "power.thirteenblade.shield" : "chat.thirteenblade.locked_creeper"),
+                Text.translatable("tooltip.thirteenblade.toughness", ThirteenBladeItem.number(BladeData.toughnessBonus(sword)), BladeData.soulCount(sword)),
                 Text.translatable("chat.thirteenblade.stolen_count", BladeData.stolenEffects(sword, System.currentTimeMillis()).size())
         ));
+        for (SoulPower power : SoulPower.values())
+            if (power.known(sword)) rows.add(Text.translatable(power.translation));
         context.enableScissor(x, y, left + 148, bottom - 20);
+        y -= statScroll;
         for (int i = 0; i < rows.size(); i++) {
             for (OrderedText line : textRenderer.wrapLines(rows.get(i), 128)) {
                 context.drawText(textRenderer, line, x, y, i == 0 || i == 6 ? 0x86DBD8 : 0xAABCCE, false);
@@ -181,6 +187,8 @@ public final class SwordChatScreen extends Screen {
             }
             y += 4;
         }
+        maxStatScroll = Math.max(0, y + statScroll - (bottom - 20));
+        statScroll = Math.min(statScroll, maxStatScroll);
         context.disableScissor();
     }
 }

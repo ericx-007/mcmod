@@ -1,10 +1,11 @@
-# 项目文件树与职责（0.3.0）
+# 项目文件树与职责（0.4.0）
 
 下面列出提交到 GitHub 的项目文件。相同名称的 `fabric.mod.json` 分别属于正式模组和测试模组。
 
 ```text
 MCmod/
 ├── README.md                         安装、操作、玩法规则、配置和构建说明
+├── CHANGELOG.md                      0.4.0 功能、升级兼容和验证摘要
 ├── LICENSE                           项目及随附资源的 MIT 许可证
 ├── .gitignore                        排除缓存、构建产物、游戏存档与本机 API 配置
 ├── .gitattributes                    统一文本换行，标记图片和 JAR 为二进制
@@ -18,7 +19,7 @@ MCmod/
 │   ├── gradle-wrapper.properties     Gradle 下载地址、版本与校验值
 │   └── gradle-8.7-bin.zip.sha256      Gradle 发行包的校验记录
 ├── src/main/java/dev/thirteenblade/
-│   ├── ThirteenBlade.java            公共初始化：注册剑、事件和怪物强化
+│   ├── ThirteenBlade.java            公共初始化：注册两把剑与升级配方、事件和怪物强化
 │   ├── ThirteenBladeItem.java        剑的基础属性、无耐久、身份初始化和物品提示
 │   ├── BalanceConfig.java            读取并校验服务器玩法配置
 │   ├── Progression.java              击杀数到等级、下一次升级的纯计算规则
@@ -27,6 +28,9 @@ MCmod/
 │   ├── BladeGameplay.java            服务器击杀、V 技能、属性刷新及网络同步
 │   ├── BladeEffects.java             效果归属、100 刻余效、外部药水兼容与黄心保存
 │   ├── BladeOwnedEffect.java         识别剑提供的状态效果的接口
+│   ├── SoulPower.java                物种家族到能力的映射、旧蜘蛛刻印兼容
+│   ├── DragonUpgradeRecipe.java       基础剑 + 龙蛋，复制原剑自定义数据
+│   ├── DragonFlight.java              飞行权限归属、5 秒余效及退出清理
 │   ├── EliteMobs.java                新自然怪物的概率强化、属性与药水效果
 │   ├── chat/
 │   │   ├── ChatSettings.java         本机对话配置与接口地址校验
@@ -35,6 +39,7 @@ MCmod/
 │   └── mixin/
 │       ├── PlayerEntityMixin.java    攻击前刷新成长，避免切换后沿用旧伤害
 │       ├── LivingEntityMixin.java    饥饿免疫、外部药水优先、移除前保存黄心
+│       ├── ClampedAttributeMixin.java  放宽盔甲韧性数值边界，支持 32 点以上
 │       ├── MobEntityMixin.java       记录怪物的生成原因
 │       └── StatusEffectInstanceMixin.java
 │                                     让效果携带并保存“由剑提供”的标记
@@ -91,3 +96,42 @@ MCmod/
 | `run/` | 开发用游戏实例：配置、日志、存档等 |
 
 `src/main` 的“公共”不等于“仅服务端”：其中的物品注册等会在客户端和服务器加载。`src/client` 才是只能由客户端加载的界面、输入等代码。`assets` 负责显示资源，`data` 负责配方等游戏数据。
+
+
+## 0.4.0 新资源与 NeoForge 独立项目
+
+```text
+src/main/resources/
+├── assets/thirteenblade/models/item/dragon_thirteen_blade.json  进阶剑物品模型
+├── assets/thirteenblade/textures/item/dragon_thirteen_blade.png  龙魂进阶剑透明贴图
+└── data/thirteenblade/recipes/dragon_thirteen_blade.json         自定义升级配方类型入口
+src/gametest/java/dev/thirteenblade/AscensionGameTests.java      本次进阶与新能力回归测试
+neoforge-1.21.1/
+├── README.md                      NeoForge 安装、构建、测试和版本要求
+├── build.gradle                   ModDevGradle、JDK 21、独立测试源集和运行任务
+├── settings.gradle                插件仓库、工具链和项目名称
+├── gradle.properties              模组及 NeoForge 版本、JVM 内存
+├── gradlew / gradlew.bat           Gradle 9.2.1 启动脚本
+├── gradle/wrapper/                Wrapper JAR、下载地址与 SHA-256
+├── src/main/java/dev/thirteenblade/
+│   ├── BladeNetwork.java          NeoForge 类型化 C2S/S2C 消息和服务器校验
+│   ├── client/                    客户端按键、HUD、对话屏幕和会话
+│   ├── chat/                      对话配置、消息、HTTP 传输
+│   ├── mixin/                     药水归属、免疫、虚弱、攻击与韧性边界
+│   └── 其余同名核心类             与 Fabric 对应，使用 Mojang 命名和 NeoForge 事件
+├── src/main/resources/
+│   ├── META-INF/neoforge.mods.toml 模组入口元数据、依赖范围和 MIT 许可
+│   ├── thirteenblade.mixins.json  Java 21 Mixin 列表
+│   ├── assets/thirteenblade/      与 Fabric 相同的两把剑模型、贴图、中英文
+│   └── data/thirteenblade/        1.21 单数目录 recipe/、advancement/
+├── src/test/java/                 成长计算与本机模拟 HTTP 的 JUnit 测试
+└── src/gametest/
+    ├── java/dev/thirteenblade/BladeGameTests.java   真实服务器行为测试
+    └── resources/data/thirteenblade/structure/empty.nbt  测试空结构
+```
+
+两个版本分别构建和发布。NeoForge 的 `BladeData` 使用不可变数据组件的更新接口，避免修改 NBT 副本后未写回；`DragonUpgradeRecipe` 复制组件差异，保留进阶剑自己的默认攻击属性。NeoForge 的自然生成检测使用事件，因此不需要 Fabric 的 `MobEntityMixin`。
+
+缓存、下载的 JDK / Minecraft、运行世界和 JAR 构建产物均不提交到源码仓库。
+
+美术新增 `docs/art/dragon-sword-source.png`（生成原图）与 `docs/art/dragon-sword-preview.png`（64×64 游戏贴图的最近邻放大预览）。

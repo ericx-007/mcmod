@@ -39,10 +39,11 @@ public final class BladeGameplay {
     public static final Identifier BALANCE = ThirteenBlade.id("balance");
     private static final UUID DAMAGE_ID = UUID.fromString("aa53b403-6899-4810-a5e0-ebd6a573d6da");
     private static final UUID HEALTH_ID = UUID.fromString("8c7594bb-a3ad-451e-aa51-d63a07f0d96a");
+    private static final UUID TOUGHNESS_ID = UUID.fromString("d1830e61-bba7-4a88-8c7f-476e6cfe9bf6");
     private static final Map<UUID, Armed> ARMED = new HashMap<>();
     private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
 
-    private record Armed(ItemStack sword, long expiresAt) {}
+    private record Armed(ItemStack sword) {}
     private BladeGameplay() {}
 
     public static void register() {
@@ -80,7 +81,7 @@ public final class BladeGameplay {
                 || !(source.getAttacker() instanceof ServerPlayerEntity player)
                 || source.getSource() != player || !validVictim(victim)) return;
         ItemStack sword = BladeInventory.activeSword(player);
-        if (!sword.isOf(ThirteenBlade.SWORD)) return;
+        if (!ThirteenBlade.isSword(sword)) return;
 
         int previous = BladeData.level(sword);
         BladeData.addKill(sword);
@@ -93,19 +94,20 @@ public final class BladeGameplay {
         }
 
         Armed armed = ARMED.get(player.getUuid());
-        if (armed != null && armed.sword == sword && armed.expiresAt > worldTime(player)) {
+        if (armed != null && armed.sword == sword) {
             // Consume before awarding: sweeping attacks cannot absorb multiple targets.
             ARMED.remove(player.getUuid());
-            String power = victim instanceof ZombieEntity ? BladeData.HUNGER_WARD
-                    : victim instanceof AbstractSkeletonEntity ? BladeData.NIGHT_SIGHT
-                    : victim instanceof SpiderEntity ? BladeData.SLOW_FALL
-                    : victim instanceof CreeperEntity ? BladeData.CREEPER_SHIELD : null;
-            boolean changed = power != null && BladeData.unlock(sword, power);
+            BladeData.write(sword).putLong("CooldownUntil", System.currentTimeMillis()
+                    + ThirteenBlade.balance.absorptionCooldownSeconds * 1000L);
+            SoulPower power = SoulPower.of(victim);
+            boolean discovered = BladeData.discover(sword, victim);
+            boolean changed = power != null && !power.known(sword);
+            if (power != null) BladeData.unlock(sword, power.flag);
+            if (discovered) player.sendMessage(Text.translatable("message.thirteenblade.discovery", victim.getType().getName()), false);
+            refreshAttributes(player);
             if (changed) {
-                String name = power.equals(BladeData.HUNGER_WARD) ? "power.thirteenblade.hunger"
-                        : power.equals(BladeData.NIGHT_SIGHT) ? "power.thirteenblade.night"
-                        : power.equals(BladeData.SLOW_FALL) ? "power.thirteenblade.slow_fall" : "power.thirteenblade.shield";
-                player.sendMessage(Text.translatable("message.thirteenblade.absorbed", Text.translatable(name)), false);
+                player.sendMessage(Text.translatable("message.thirteenblade.absorbed", Text.translatable(power.translation)), false);
+                refreshAttributes(player);
             }
             boolean hadBuff = false;
             boolean refillShield = victim instanceof CreeperEntity;
@@ -124,12 +126,12 @@ public final class BladeGameplay {
                 BladeEffects.replenishShield(player, sword);
                 player.sendMessage(Text.translatable("message.thirteenblade.shield_refilled"), false);
             }
-            if (power == null && !hadBuff) {
+            if (power == null && !hadBuff && !discovered) {
                 player.sendMessage(Text.translatable("message.thirteenblade.no_power"), false);
-            } else if (!changed && !refillShield) {
+            } else if (!changed && !refillShield && !discovered) {
                 player.sendMessage(Text.translatable("message.thirteenblade.known_power"), false);
             }
-            if (changed || refillShield) {
+            if (changed || refillShield || discovered) {
                 player.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, 1, 0.8f);
                 player.getServerWorld().spawnParticles(ParticleTypes.SOUL, victim.getX(), victim.getY() + 0.6,
                         victim.getZ(), 18, 0.3, 0.4, 0.3, 0.04);
@@ -155,7 +157,7 @@ public final class BladeGameplay {
             return;
         }
         ItemStack sword = BladeInventory.activeSword(player);
-        if (!sword.isOf(ThirteenBlade.SWORD)) {
+        if (!ThirteenBlade.isSword(sword)) {
             player.sendMessage(Text.translatable("message.thirteenblade.hold"), true);
             return;
         }
@@ -165,10 +167,8 @@ public final class BladeGameplay {
             player.sendMessage(Text.translatable("message.thirteenblade.cooldown", (cooldown + 999) / 1000), true);
             return;
         }
-        BalanceConfig config = ThirteenBlade.balance;
-        BladeData.write(sword).putLong("CooldownUntil", now + config.absorptionCooldownSeconds * 1000L);
-        ARMED.put(player.getUuid(), new Armed(sword, tick + config.absorptionWindowSeconds * 20L));
-        player.sendMessage(Text.translatable("message.thirteenblade.armed", config.absorptionWindowSeconds), true);
+        ARMED.put(player.getUuid(), new Armed(sword));
+        player.sendMessage(Text.translatable("message.thirteenblade.armed"), true);
         player.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, 0.6f, 1.1f);
         sendStatus(player);
     }
@@ -179,8 +179,7 @@ public final class BladeGameplay {
             BladeEffects.refresh(player);
             ItemStack sword = BladeInventory.activeSword(player);
             Armed armed = ARMED.get(player.getUuid());
-            if (armed != null && (!player.isAlive() || player.isSpectator() || sword != armed.sword
-                    || worldTime(player) >= armed.expiresAt)) {
+            if (armed != null && (!player.isAlive() || player.isSpectator() || sword != armed.sword)) {
                 ARMED.remove(player.getUuid());
                 player.sendMessage(Text.translatable("message.thirteenblade.ended"), true);
                 sendStatus(player);
@@ -191,11 +190,13 @@ public final class BladeGameplay {
 
     public static void refreshAttributes(ServerPlayerEntity player) {
         ItemStack sword = BladeInventory.activeSword(player);
-        boolean active = player.isAlive() && !player.isSpectator() && sword.isOf(ThirteenBlade.SWORD);
+        boolean active = player.isAlive() && !player.isSpectator() && ThirteenBlade.isSword(sword);
         setModifier(player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE), DAMAGE_ID,
                 "Thirteen Blade growth", active ? BladeData.damageBonus(sword) : 0);
         setModifier(player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH), HEALTH_ID,
                 "Thirteen Blade vitality", player.isAlive() && !player.isSpectator() ? BladeInventory.healthBonus(player) : 0);
+        setModifier(player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS), TOUGHNESS_ID,
+                "Thirteen Blade soul toughness", active ? BladeData.toughnessBonus(sword) : 0);
         // Never heal on equip: switching swords cannot be used as a healing exploit.
         if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
     }
@@ -213,9 +214,9 @@ public final class BladeGameplay {
         if (!ServerPlayNetworking.canSend(player, STATUS)) return;
         Armed armed = ARMED.get(player.getUuid());
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeVarInt(armed == null ? 0 : (int) Math.max(0, (armed.expiresAt - worldTime(player) + 19) / 20));
+        buf.writeVarInt(armed == null ? 0 : 1);
         ItemStack sword = BladeInventory.activeSword(player);
-        buf.writeVarInt(sword.isOf(ThirteenBlade.SWORD)
+        buf.writeVarInt(ThirteenBlade.isSword(sword)
                 ? (int) ((BladeData.cooldownRemaining(sword, System.currentTimeMillis()) + 999) / 1000) : 0);
         ServerPlayNetworking.send(player, STATUS, buf);
     }
@@ -225,7 +226,7 @@ public final class BladeGameplay {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(config.killsPerLevel);
         buf.writeDouble(config.damagePerLevel).writeDouble(config.healthPerLevel);
-        buf.writeVarInt(config.absorptionWindowSeconds).writeVarInt(config.absorptionCooldownSeconds);
+        buf.writeVarInt(config.absorptionCooldownSeconds);
         buf.writeDouble(config.eliteSpawnChance).writeDouble(config.eliteHealthMultiplier);
         buf.writeVarInt(config.eliteMaxEffects).writeVarInt(config.eliteMaxEffectLevel);
         buf.writeVarInt(config.maxStolenEffectLevel).writeInt(config.stolenEffectDurationSeconds);

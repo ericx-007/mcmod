@@ -109,7 +109,7 @@ public final class BladeGameTests implements FabricGameTest {
         var toggle = BladeGameplay.class.getDeclaredMethod("toggleAbsorption", ServerPlayerEntity.class);
         toggle.setAccessible(true);
         toggle.invoke(null, player);
-        context.assertTrue(BladeData.cooldownRemaining(sword, System.currentTimeMillis()) > 0, "Activation must start cooldown");
+        context.assertTrue(BladeData.cooldownRemaining(sword, System.currentTimeMillis()) == 0, "Arming must not start cooldown");
         player.attack(zombie(context));
         context.assertTrue(BladeData.has(sword, BladeData.HUNGER_WARD), "Zombie soul must unlock hunger immunity");
         var skeleton = EntityType.SKELETON.create(context.getWorld());

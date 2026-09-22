@@ -3,6 +3,9 @@ package dev.thirteenblade.mixin;
 import dev.thirteenblade.BladeData;
 import dev.thirteenblade.BladeEffects;
 import dev.thirteenblade.BladeInventory;
+import dev.thirteenblade.SoulPower;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import dev.thirteenblade.ThirteenBlade;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Entity;
@@ -32,11 +35,19 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "canHaveStatusEffect", at = @At("HEAD"), cancellable = true)
     private void thirteenblade$wardHunger(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) this instanceof PlayerEntity player
-                && effect.getEffectType() == StatusEffects.HUNGER
-                && BladeInventory.activeSword(player).isOf(ThirteenBlade.SWORD)
-                && BladeData.has(BladeInventory.activeSword(player), BladeData.HUNGER_WARD)) {
+        if ((Object) this instanceof PlayerEntity player && ThirteenBlade.isSword(BladeInventory.activeSword(player))
+                && ((effect.getEffectType() == StatusEffects.HUNGER && SoulPower.ZOMBIE.known(BladeInventory.activeSword(player)))
+                || ((effect.getEffectType() == StatusEffects.BLINDNESS || effect.getEffectType() == StatusEffects.DARKNESS)
+                    && SoulPower.WARDEN.known(BladeInventory.activeSword(player))))) {
             cir.setReturnValue(false);
         }
+    }
+
+    @Inject(method = "damage", at = @At("RETURN"))
+    private void thirteenblade$weakeningHit(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValue() && amount > 0 && source.isOf(DamageTypes.PLAYER_ATTACK)
+                && source.getAttacker() instanceof ServerPlayerEntity player
+                && SoulPower.VINDICATOR.known(BladeInventory.activeSword(player)))
+            ((LivingEntity) (Object) this).addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 100, 0), player);
     }
 }

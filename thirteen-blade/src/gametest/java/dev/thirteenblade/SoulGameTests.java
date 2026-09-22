@@ -127,8 +127,8 @@ public final class SoulGameTests implements FabricGameTest {
         var spiderPlayer = player(context, spiderSword);
         arm(spiderPlayer);
         kill(context, spiderPlayer, EntityType.CAVE_SPIDER.create(context.getWorld()));
-        context.assertTrue(BladeData.has(spiderSword, BladeData.SLOW_FALL), "Spiders and cave spiders must unlock slow falling");
-        context.assertTrue(spiderPlayer.getStatusEffect(StatusEffects.SLOW_FALLING).isInfinite(), "Slow falling must have infinite duration");
+        context.assertTrue(SoulPower.SPIDER.known(spiderSword), "Spiders and cave spiders must unlock invisibility");
+        context.assertTrue(spiderPlayer.getStatusEffect(StatusEffects.INVISIBILITY).isInfinite(), "Invisibility must have infinite duration");
         ItemStack creeperSword = new ItemStack(ThirteenBlade.SWORD);
         var creeperPlayer = player(context, creeperSword);
         arm(creeperPlayer);

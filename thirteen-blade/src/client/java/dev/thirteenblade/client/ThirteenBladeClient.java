@@ -42,7 +42,6 @@ public final class ThirteenBladeClient implements ClientModInitializer {
             config.killsPerLevel = buf.readVarInt();
             config.damagePerLevel = buf.readDouble();
             config.healthPerLevel = buf.readDouble();
-            config.absorptionWindowSeconds = buf.readVarInt();
             config.absorptionCooldownSeconds = buf.readVarInt();
             config.eliteSpawnChance = buf.readDouble();
             config.eliteHealthMultiplier = buf.readDouble();
@@ -66,7 +65,7 @@ public final class ThirteenBladeClient implements ClientModInitializer {
             while (chatKey.wasPressed()) {
                 if (client.player == null || client.currentScreen != null) continue;
                 ItemStack stack = BladeInventory.activeSword(client.player);
-                if (stack.isOf(ThirteenBlade.SWORD)) client.setScreen(new SwordChatScreen(stack));
+                if (ThirteenBlade.isSword(stack)) client.setScreen(new SwordChatScreen(stack));
                 else client.player.sendMessage(Text.translatable("message.thirteenblade.hold"), true);
             }
         });
@@ -74,8 +73,8 @@ public final class ThirteenBladeClient implements ClientModInitializer {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player == null || client.options.hudHidden || client.currentScreen != null) return;
             ItemStack sword = BladeInventory.activeSword(client.player);
-            if (!sword.isOf(ThirteenBlade.SWORD)) return;
-            Text status = armedSeconds > 0 ? Text.translatable("hud.thirteenblade.armed", armedSeconds)
+            if (!ThirteenBlade.isSword(sword)) return;
+            Text status = armedSeconds > 0 ? Text.translatable("hud.thirteenblade.armed")
                     : cooldownSeconds > 0 ? Text.translatable("hud.thirteenblade.cooldown", cooldownSeconds)
                     : Text.translatable("hud.thirteenblade.ready", absorbKey.getBoundKeyLocalizedText());
             Text level = Text.translatable("hud.thirteenblade.level", BladeData.level(sword), BladeData.kills(sword));

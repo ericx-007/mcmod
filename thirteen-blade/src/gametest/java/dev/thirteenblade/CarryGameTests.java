@@ -12,7 +12,7 @@ import net.minecraft.util.Hand;
 
 public final class CarryGameTests implements FabricGameTest {
     private static ItemStack sword(int kills) {
-        var sword = new ItemStack(ThirteenBlade.SWORD);
+        var sword = new ItemStack(ThirteenBlade.DRAGON_SWORD);
         BladeData.write(sword).putInt("Kills", kills);
         return sword;
     }
@@ -84,7 +84,7 @@ public final class CarryGameTests implements FabricGameTest {
         player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         player.setStackInHand(Hand.OFF_HAND, sword);
         SoulGameTests.kill(context, player, EntityType.SPIDER.create(context.getWorld()));
-        context.assertTrue(BladeData.has(sword, BladeData.SLOW_FALL), "Moving the same sword between hands must keep the prepared skill");
+        context.assertTrue(SoulPower.SPIDER.known(sword), "Moving the same sword between hands must keep the prepared skill");
         BladeEffects.release(player);
         context.complete();
     }

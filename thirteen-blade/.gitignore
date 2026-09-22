@@ -1,5 +1,6 @@
 .gradle/
 .gradle-user-home/
+.gradle-user-home-neo/
 build/
 run/
 .idea/
@@ -9,3 +10,4 @@ run/
 **/thirteenblade-chat.json
 .env
 .env.*
+runs/

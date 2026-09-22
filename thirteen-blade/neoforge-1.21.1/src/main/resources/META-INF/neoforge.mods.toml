@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+[[mods]]
+modId="thirteenblade"
+version="${version}"
+displayName="Thirteen Blade"
+authors="ericx-007, Thirteen Blade contributors"
+description="Growing pact swords with dragon ascension, soul absorption and private sword-spirit dialogue."
+[[dependencies.thirteenblade]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.251,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.thirteenblade]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+[[mixins]]
+config="thirteenblade.mixins.json"

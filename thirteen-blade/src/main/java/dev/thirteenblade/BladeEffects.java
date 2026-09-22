@@ -35,15 +35,17 @@ public final class BladeEffects {
     }
 
     public static void release(ServerPlayerEntity player) {
+        DragonFlight.release(player);
         for (StatusEffectInstance effect : new ArrayList<>(player.getStatusEffects()))
             if (owned(effect)) player.removeStatusEffect(effect.getEffectType());
         GRANTS.remove(player.getUuid());
     }
 
-    public static void clear() { GRANTS.clear(); }
+    public static void clear() { GRANTS.clear(); DragonFlight.clear(); }
 
     public static void refresh(ServerPlayerEntity player) {
         if (!player.isAlive() || player.isSpectator()) { release(player); return; }
+        DragonFlight.refresh(player);
         ItemStack sword = BladeInventory.activeSword(player);
         long now = System.currentTimeMillis();
         long tick = player.getServer().getOverworld().getTime();
@@ -79,6 +81,10 @@ public final class BladeEffects {
             }
         }
         if (!sword.isEmpty() && BladeData.has(sword, BladeData.HUNGER_WARD)) player.removeStatusEffect(StatusEffects.HUNGER);
+        if (SoulPower.WARDEN.known(sword)) {
+            player.removeStatusEffect(StatusEffects.BLINDNESS);
+            player.removeStatusEffect(StatusEffects.DARKNESS);
+        }
         for (var target : desired.values()) {
             if (player.getStatusEffect(target.effect()) != null) continue;
             Grant grant = new Grant(sword, target.expiresAt());
