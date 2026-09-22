@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "thirteenblade_tests",
+  "version": "1.0.0",
+  "name": "Thirteen Blade Development Tests",
+  "environment": "server",
+  "entrypoints": {"fabric-gametest": ["dev.thirteenblade.BladeGameTests", "dev.thirteenblade.SoulGameTests", "dev.thirteenblade.CarryGameTests"]},
+  "depends": {"thirteenblade": "*", "fabric-gametest-api-v1": "*"}
+}

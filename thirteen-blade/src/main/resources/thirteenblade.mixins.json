@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.thirteenblade.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["LivingEntityMixin", "PlayerEntityMixin", "MobEntityMixin", "StatusEffectInstanceMixin"],
+  "injectors": {"defaultRequire": 1}
+}

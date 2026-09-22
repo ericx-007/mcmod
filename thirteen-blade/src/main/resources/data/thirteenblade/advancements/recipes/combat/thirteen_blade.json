@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_diamond_sword": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["minecraft:diamond_sword"]}]}
+    }
+  },
+  "rewards": {"recipes": ["thirteenblade:thirteen_blade"]}
+}

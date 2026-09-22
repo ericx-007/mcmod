@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "thirteenblade",
+  "version": "${version}",
+  "name": "Thirteen Blade · 十三契刃",
+  "description": "An unbreakable growing sword with soul absorption and a private sword-spirit conversation screen.",
+  "authors": ["Thirteen Blade contributors"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.thirteenblade.ThirteenBlade"],
+    "client": ["dev.thirteenblade.client.ThirteenBladeClient"]
+  },
+  "mixins": ["thirteenblade.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
