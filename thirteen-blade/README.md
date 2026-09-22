@@ -2,6 +2,8 @@
 
 一个增加成长剑、灵魂抢夺及随机强化怪物的 Fabric 模组原型，当前版本 **0.3.0**，支持 **Minecraft Java 1.20.1、Java 17、Fabric Loader 0.16.14 或更高版本**。客户端和服务器都需要安装相同版本的本模组及对应版本的 Fabric API。物品种类仍只新增一把剑。
 
+开源协议：[MIT License](LICENSE)。
+
 首次开发模组，可以先读 [结合本项目的开发入门讲解](docs/MOD_DEVELOPMENT_GUIDE.md)。
 
 查看源码时可以对照 [完整文件树与各文件作用](docs/PROJECT_STRUCTURE.md)。
@@ -162,4 +164,10 @@ macOS / Linux 可使用 `bash ./gradlew --gradle-user-home .gradle-user-home bui
 
 内置 imagegen 生成钻石剑轮廓、紫青色泰拉瑞亚风格的原创像素剑，再用最近邻采样整理成 32×32 游戏贴图。没有提取或打包泰拉瑞亚原版材质。
 
-原图、像素预览、生成提示词分别见 `docs/art/sword-source.png`、`docs/art/sword-preview.png`、[美术记录](docs/art/PROMPT.md)。源码与随附项目资源采用 MIT 许可证。
+原图、像素预览、生成提示词分别见 `docs/art/sword-source.png`、`docs/art/sword-preview.png`、[美术记录](docs/art/PROMPT.md)。
+
+## 开源协议
+
+本项目的原创源码、文档和美术资源采用 [MIT License](LICENSE)：允许使用、修改、分发及商用，分发副本或实质性部分时须保留版权声明和许可声明。软件按原样提供，不作担保。正式条款以 `LICENSE` 中的英文全文为准。
+
+第三方组件（例如 Gradle Wrapper、Minecraft 和 Fabric 相关依赖）遵循各自的许可证，本项目的 MIT 声明不替代它们的许可条款。
