@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_netherite_sword": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{"items": ["minecraft:netherite_sword"]}]}
+    }
+  },
+  "rewards": {"recipes": ["thirteenblade:thirteen_blade"]}
+}

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" S ", " D ", " P "],
+  "key": {
+    "S": {"item": "minecraft:nether_star"},
+    "D": {"item": "minecraft:diamond_sword"},
+    "P": {"item": "minecraft:ender_pearl"}
+  },
+  "result": {"item": "thirteenblade:thirteen_blade"}
+}

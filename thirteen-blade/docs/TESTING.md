@@ -86,3 +86,14 @@ JUnit 16 项验证同一组成长与 HTTP 行为。NeoForge GameTest（17 项）
 ## 0.4.1 验证
 
 两版各新增 3 项 GameTest：两把剑的主副手升级均按实际生命上限回血（包含其他背包剑提供的更高上限）；普通击杀、刷新和基础剑超过 10 级不回血；旧剑补齐抢夺 III / 绑定诅咒且保留其他附魔、名称、击杀，重复刷新不重复写入，抢夺 V 不被降级，合成取得的物品具有固有附魔。
+
+
+## Forge 移植验证（2026-09-23）
+
+- Forge 1.20.1：JDK 17、Forge 47.4.20，16 项 JUnit 和 17 项 GameTest 全部通过，正式 JAR 已重新混淆，包含有效 refmap 与资源包元数据。
+- Forge 1.12.2：Java 8 目标，16 项 JUnit 通过；独立 Forge 服务器运行 11 组场景，正式混淆环境加载 First Aid 时为 12 组。测试包含实际伤害与死亡事件，不把客户端类放进服务器入口。
+- 1.12.2 的集成测试独立成 `src/integration`，通过 `-PbladeIntegrationTest runServer` 启用。完成后自动退出并由 `verifyBladeIntegration` 检查报告；发布包不含测试模组。
+- Forge 2860 + First Aid 1.6.22 的发布包测试、完整 RLCraft 副本和 Better MC 服务端副本的范围见 [整合包适配记录](MODPACK_COMPATIBILITY.md)。测试副本不会修改原存档。
+- `python tools/validate_resources.py` 检查全部四个发布包：每版 81 个中英文键、原始透明贴图一致、加载器元数据、MIT、两剑配方、测试代码隔离；另检查旧版字节码为 Java 8，现代 Forge refmap 包含映射。
+
+1.12.2 的 API 测试只访问本机临时 HTTP 服务，无真实服务商密钥。该版本也测试响应大小限制和服务端发完请求头后停顿的超时情形。原有 Fabric / NeoForge 代码没有本次行为修改，因此沿用之前已通过的测试结果，另重跑四版资源检查。

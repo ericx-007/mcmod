@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "dev.thirteenblade.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "LivingEntityMixin",
+    "PlayerEntityMixin",
+    "StatusEffectInstanceMixin",
+    "ClampedAttributeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "thirteenblade.refmap.json",
+  "minVersion": "0.8"
+}

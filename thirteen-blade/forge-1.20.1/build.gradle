@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+    id 'org.spongepowered.mixin' version '0.7.38'
+}
+version = mod_version
+group = 'dev.thirteenblade'
+base { archivesName = 'thirteen-blade-forge-1.20.1' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(17); withSourcesJar() }
+sourceSets { gametest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
+configurations { gametestImplementation.extendsFrom implementation }
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach { workingDirectory project.file('run'); property 'forge.logging.console.level', 'info'; mods { thirteenblade { source sourceSets.main } } }
+        client {}
+        server { args '--nogui' }
+        gameTestServer { property 'forge.enabledGameTestNamespaces', 'thirteenblade'; mods { thirteenblade { source sourceSets.gametest } } }
+    }
+}
+mixin { add sourceSets.main, 'thirteenblade.refmap.json'; config 'thirteenblade.mixins.json' }
+repositories { mavenCentral(); maven { url = 'https://repo.spongepowered.org/repository/maven-public/' } }
+dependencies {
+    minecraft "net.minecraftforge:forge:1.20.1-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+processResources { inputs.property 'version', project.version; filesMatching('META-INF/mods.toml') { expand version: project.version } }
+test { useJUnitPlatform() }
+jar { from('../LICENSE'); manifest { attributes 'MixinConfigs': 'thirteenblade.mixins.json' }; finalizedBy 'reobfJar' }

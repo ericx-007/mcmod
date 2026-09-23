@@ -11,3 +11,5 @@ run/
 .env
 .env.*
 runs/
+.gradle-user-home-forge/
+.gradle-user-home-legacy/

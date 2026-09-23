@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="thirteenblade"
+version="${version}"
+displayName="Thirteen Blade"
+authors="ericx-007, Thirteen Blade contributors"
+description="Growing pact swords, soul absorption and sword-spirit dialogue for Forge 1.20.1."
+[[dependencies.thirteenblade]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.thirteenblade]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"

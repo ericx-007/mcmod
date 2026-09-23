@@ -1,0 +1,29 @@
+plugins { id 'java-library'; id 'com.gtnewhorizons.retrofuturagradle' version '1.4.2' }
+version = mod_version
+group = 'dev.thirteenblade'
+base { archivesName = 'thirteen-blade-forge-1.12.2' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(8); withSourcesJar() }
+minecraft { mcVersion = '1.12.2'; username = 'BladeDev' }
+sourceSets { integration { compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath; runtimeClasspath += sourceSets.main.runtimeClasspath } }
+repositories { mavenCentral() }
+dependencies { testImplementation 'junit:junit:4.13.2' }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+processResources { inputs.property 'version', project.version; filesMatching('mcmod.info') { expand version: project.version } }
+jar { from('../LICENSE') }
+tasks.register('integrationJar', Jar) { archiveClassifier = 'integration-tests'; from sourceSets.integration.output }
+tasks.named('reobfIntegrationJar') { archiveClassifier = 'integration-tests-obf'; referenceClasspath.from(sourceSets.main.output) }
+if (project.hasProperty('bladeIntegrationTest')) {
+    tasks.register('verifyBladeIntegration') {
+        doLast {
+            def report = file('run/thirteenblade-integration-results.txt')
+            if (!report.exists()) throw new GradleException('Integration server produced no report')
+            def results = report.readLines('UTF-8')
+            if (results.size() < 11 || results.any { !it.startsWith('PASS ') }) throw new GradleException('Integration tests failed: ' + report)
+        }
+    }
+    tasks.named('runServer') {
+        dependsOn tasks.named('integrationClasses'); classpath += sourceSets.integration.output
+        doFirst { file('run/thirteenblade-integration-results.txt').delete() }
+        finalizedBy tasks.named('verifyBladeIntegration')
+    }
+}

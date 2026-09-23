@@ -137,3 +137,54 @@ neoforge-1.21.1/
 美术新增 `docs/art/dragon-sword-source.png`（生成原图）与 `docs/art/dragon-sword-preview.png`（64×64 游戏贴图的最近邻放大预览）。
 
 0.4.1 新增：两版 `BladeEnchantments.java` 负责固有抢夺 III / 绑定诅咒补齐；两版 `StrengthGameTests.java` 验证升级回血与附魔迁移。`BladeGameplay` 仅在击杀引起等级提升后回血。
+
+
+## Forge 移植目录
+
+四个加载器项目分别构建，不将其他项目的类打进自己的 JAR。
+
+```text
+forge-1.20.1/
+├── README.md                         Better MC 安装及构建要求
+├── build.gradle / settings.gradle    ForgeGradle、MixinGradle、Java 17、JUnit 与 GameTest
+├── gradle.properties                 Forge 47.4.20 与模组版本
+├── gradlew / gradlew.bat / gradle/    Gradle 8.7 wrapper
+├── src/main/java/dev/thirteenblade/  Forge 注册、网络、玩法、NBT 与客户端实现
+│   ├── BladeNetwork.java             SimpleChannel：V 请求、状态、服务器配置
+│   ├── client/                       按键、HUD、独立对话界面
+│   ├── chat/                         Java 17 HTTP 对话实现
+│   └── mixin/                        攻击、药水归属与韧性属性边界
+├── src/main/resources/
+│   ├── META-INF/mods.toml            Forge 元数据及 MIT 许可
+│   ├── pack.mcmeta                   1.20.1 资源包格式 15
+│   ├── thirteenblade.mixins.json     含 refmap 的 Mixin 设置
+│   ├── assets/thirteenblade/         两把剑模型、透明贴图、中英文
+│   └── data/thirteenblade/           recipes 和 advancements
+├── src/test/                         16 项成长与 HTTP 单元测试
+└── src/gametest/                     17 项服务器 GameTest 和测试结构
+
+forge-1.12.2/
+├── README.md                         RLCraft、First Aid、旧版差异与构建说明
+├── build.gradle / settings.gradle    RetroFuturaGradle 1.4.2、Java 8 编译和隔离测试
+├── gradle.properties                 模组版本、JDK8_HOME 工具链发现
+├── gradlew / gradlew.bat / gradle/    Gradle 8.7 wrapper
+├── src/main/java/dev/thirteenblade/
+│   ├── ThirteenBlade.java            旧版 @Mod、注册两把剑、配方和防火掉落实体
+│   ├── CommonProxy.java              无客户端类依赖的代理入口
+│   ├── FirstAidBridge.java           可选能力接口，部位缩放与升级全恢复
+│   ├── BladeEffects.java             Forge 药水事件、效果归属、五秒余效和黄心
+│   ├── BladeNetwork.java             旧版 SimpleNetworkWrapper 消息及服务端验证
+│   ├── 其余同名核心类                Java 8 / MCP 1.12.2 玩法和 NBT 实现
+│   ├── client/ClientProxy.java       客户端模型注册、渲染、按键和 HUD
+│   ├── client/SwordChatScreen.java   旧版 GuiScreen 私人对话窗口
+│   ├── client/SwordChat.java         每剑会话、异步回应和离线回退
+│   └── chat/                        Java 8 HttpURLConnection，密钥留在客户端
+├── src/main/resources/
+│   ├── mcmod.info / pack.mcmeta      旧版元数据与资源包格式 3
+│   └── assets/thirteenblade/         .lang 翻译、纹理、模型和旧版 recipes
+├── src/test/                         16 项成长与 HTTP 单元测试
+└── src/integration/java/dev/thirteenblade/test/LegacyIntegration.java
+                                      可选独立测试模组，真实服务器击杀和 First Aid 回归
+```
+
+`tools/validate_resources.py` 现在检查全部四版的 JAR、协议、贴图、翻译、配方、测试类隔离及 Forge refmap / Java 8 字节码。整合包副本、第三方模组、运行配置、日志和测试世界都留在被忽略的 `build/` 或 `run/` 下，不上传源码仓库。
