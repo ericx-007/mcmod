@@ -39,6 +39,7 @@ public final class AscensionGameTests implements FabricGameTest {
         sword.addEnchantment(net.minecraft.enchantment.Enchantments.SHARPNESS, 3);
         BladeData.unlock(sword, SoulPower.DRAGON.flag);
         BladeData.saveShield(sword, 1);
+        BladeEnchantments.ensure(sword);
         context.assertTrue(BladeData.level(sword) == 10, "Base blade caps at ten while retaining every kill");
         var player = SoulGameTests.player(context, sword);
         var inventory = new CraftingInventory(player.playerScreenHandler, 2, 2);

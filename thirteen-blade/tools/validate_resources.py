@@ -35,7 +35,7 @@ for project, loader, recipe_dir, jar_prefix in [
         for name in ["thirteenblade.mixins.json", "dev/thirteenblade/ThirteenBlade.class",
                      "dev/thirteenblade/client/ThirteenBladeClient.class", "dev/thirteenblade/client/SwordChatScreen.class",
                      "dev/thirteenblade/DragonUpgradeRecipe.class", "dev/thirteenblade/SoulPower.class",
-                     "dev/thirteenblade/DragonFlight.class"]:
+                     "dev/thirteenblade/DragonFlight.class", "dev/thirteenblade/BladeEnchantments.class"]:
             assert name in names, f"Missing {name}"
         assert not any("GameTests" in name or "ChatTransportTest" in name or name.endswith("empty.nbt") for name in names), "Tests must not ship"
         assert any("LICENSE" in name for name in names), "Missing MIT license"

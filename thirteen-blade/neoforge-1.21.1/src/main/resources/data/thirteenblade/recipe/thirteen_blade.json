@@ -18,6 +18,14 @@
     }
   },
   "result": {
-    "id": "thirteenblade:thirteen_blade"
+    "id": "thirteenblade:thirteen_blade",
+    "components": {
+      "minecraft:enchantments": {
+        "levels": {
+          "minecraft:looting": 3,
+          "minecraft:binding_curse": 1
+        }
+      }
+    }
   }
 }

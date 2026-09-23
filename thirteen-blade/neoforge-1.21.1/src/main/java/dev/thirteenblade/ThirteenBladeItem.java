@@ -26,8 +26,15 @@ public final class ThirteenBladeItem extends SwordItem {
     @Override public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
     @Override public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner) { return true; }
     @Override public boolean isValidRepairItem(ItemStack stack, ItemStack ingredient) { return false; }
+    @Override public void onCraftedBy(ItemStack stack, Level level, net.minecraft.world.entity.player.Player player) {
+        super.onCraftedBy(stack, level, player);
+        if (!level.isClientSide) BladeEnchantments.ensure(stack, level.registryAccess());
+    }
     @Override public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        if (!level.isClientSide) BladeData.ensureIdentity(stack);
+        if (!level.isClientSide) {
+            BladeData.ensureIdentity(stack);
+            BladeEnchantments.ensure(stack, level.registryAccess());
+        }
     }
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
         BalanceConfig config = ThirteenBlade.balance;

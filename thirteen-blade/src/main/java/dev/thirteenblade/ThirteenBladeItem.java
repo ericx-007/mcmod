@@ -36,8 +36,20 @@ public final class ThirteenBladeItem extends SwordItem {
     @Override public boolean canRepair(ItemStack stack, ItemStack ingredient) { return false; }
     @Override public boolean isEnchantable(ItemStack stack) { return stack.getCount() == 1; }
 
+    @Override public ItemStack getDefaultStack() {
+        ItemStack stack = super.getDefaultStack();
+        BladeEnchantments.ensure(stack);
+        return stack;
+    }
+
+    @Override public void onCraft(ItemStack stack, World world, net.minecraft.entity.player.PlayerEntity player) {
+        super.onCraft(stack, world, player);
+        if (!world.isClient) BladeEnchantments.ensure(stack);
+    }
+
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) BladeEnchantments.ensure(stack);
         if (!world.isClient && !BladeData.read(stack).containsUuid("Identity"))
             BladeData.write(stack).putUuid("Identity", java.util.UUID.randomUUID());
     }

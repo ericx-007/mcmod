@@ -69,7 +69,7 @@ public final class BladeGameTests implements FabricGameTest {
         context.assertTrue(player.getMaxHealth() == 20, "Initial health must be 20");
         player.attack(zombie(context));
         context.assertTrue(BladeData.kills(sword) == 13 && BladeData.level(sword) == 1, "Kill 13 must level once");
-        context.assertTrue(player.getMaxHealth() == 22 && player.getHealth() == 20, "Level raises cap without free healing");
+        context.assertTrue(player.getMaxHealth() == 22 && player.getHealth() == 22, "Level raises cap and heals to the new maximum");
         for (int i = 0; i < 20; i++) BladeGameplay.refreshAttributes(player);
         context.assertTrue(player.getMaxHealth() == 22, "Repeated updates must not stack health");
         player.setHealth(22);

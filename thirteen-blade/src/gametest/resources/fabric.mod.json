@@ -4,6 +4,17 @@
   "version": "1.0.0",
   "name": "Thirteen Blade Development Tests",
   "environment": "server",
-  "entrypoints": {"fabric-gametest": ["dev.thirteenblade.BladeGameTests", "dev.thirteenblade.SoulGameTests", "dev.thirteenblade.CarryGameTests", "dev.thirteenblade.AscensionGameTests"]},
-  "depends": {"thirteenblade": "*", "fabric-gametest-api-v1": "*"}
+  "entrypoints": {
+    "fabric-gametest": [
+      "dev.thirteenblade.BladeGameTests",
+      "dev.thirteenblade.SoulGameTests",
+      "dev.thirteenblade.CarryGameTests",
+      "dev.thirteenblade.AscensionGameTests",
+      "dev.thirteenblade.StrengthGameTests"
+    ]
+  },
+  "depends": {
+    "thirteenblade": "*",
+    "fabric-gametest-api-v1": "*"
+  }
 }

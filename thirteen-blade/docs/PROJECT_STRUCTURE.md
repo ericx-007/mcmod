@@ -1,4 +1,4 @@
-# 项目文件树与职责（0.4.0）
+# 项目文件树与职责（0.4.1）
 
 下面列出提交到 GitHub 的项目文件。相同名称的 `fabric.mod.json` 分别属于正式模组和测试模组。
 
@@ -135,3 +135,5 @@ neoforge-1.21.1/
 缓存、下载的 JDK / Minecraft、运行世界和 JAR 构建产物均不提交到源码仓库。
 
 美术新增 `docs/art/dragon-sword-source.png`（生成原图）与 `docs/art/dragon-sword-preview.png`（64×64 游戏贴图的最近邻放大预览）。
+
+0.4.1 新增：两版 `BladeEnchantments.java` 负责固有抢夺 III / 绑定诅咒补齐；两版 `StrengthGameTests.java` 验证升级回血与附魔迁移。`BladeGameplay` 仅在击杀引起等级提升后回血。

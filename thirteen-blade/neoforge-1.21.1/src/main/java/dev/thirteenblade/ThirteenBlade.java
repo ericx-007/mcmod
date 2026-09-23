@@ -39,7 +39,13 @@ public final class ThirteenBlade {
         EliteMobs.register();
     }
     private void creativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.COMBAT) { event.accept(SWORD); event.accept(DRAGON_SWORD); }
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            for (var item : java.util.List.of(SWORD, DRAGON_SWORD)) {
+                var stack = item.toStack();
+                BladeEnchantments.ensure(stack, event.getParameters().holders());
+                event.accept(stack);
+            }
+        }
     }
     public static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath(ID, path); }
     public static boolean isSword(net.minecraft.world.item.ItemStack stack) { return stack.getItem() instanceof ThirteenBladeItem; }

@@ -30,7 +30,7 @@ public final class ThirteenBlade implements ModInitializer {
         Registry.register(Registries.ITEM, id("thirteen_blade"), SWORD);
         Registry.register(Registries.ITEM, id("dragon_thirteen_blade"), DRAGON_SWORD);
         Registry.register(Registries.RECIPE_SERIALIZER, id("dragon_upgrade"), DRAGON_UPGRADE);
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> { entries.add(SWORD); entries.add(DRAGON_SWORD); });
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> { entries.add(SWORD.getDefaultStack()); entries.add(DRAGON_SWORD.getDefaultStack()); });
         BladeGameplay.register();
         EliteMobs.register();
         LOGGER.info("Thirteen Blade initialized (Minecraft 1.20.1)");

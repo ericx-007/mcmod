@@ -32,6 +32,7 @@ public final class DragonUpgradeRecipe extends SpecialCraftingRecipe {
             if (!source.isOf(ThirteenBlade.SWORD)) continue;
             ItemStack result = new ItemStack(ThirteenBlade.DRAGON_SWORD);
             if (source.hasNbt()) result.setNbt(source.getNbt().copy());
+            BladeEnchantments.ensure(result);
             return result;
         }
         return ItemStack.EMPTY;

@@ -88,6 +88,7 @@ public final class BladeGameTests {
         sword.set(DataComponents.CUSTOM_NAME, Component.literal("Ancient blade"));
         BladeData.unlock(sword, SoulPower.DRAGON.flag);
         BladeData.saveShield(sword, 1);
+        BladeEnchantments.ensure(sword, h.getLevel().registryAccess());
         h.assertTrue(BladeData.level(sword) == 10, "Base caps at ten");
         var recipe = new DragonUpgradeRecipe(CraftingBookCategory.EQUIPMENT);
         var input = CraftingInput.of(2, 2, List.of(sword, ItemStack.EMPTY, ItemStack.EMPTY, new ItemStack(Items.DRAGON_EGG)));

@@ -1,11 +1,11 @@
 # 十三契刃 — NeoForge 1.21.1
 
-与 [Fabric 版](../README.md) 相同的 0.4.0 玩法，包括两把剑、升级继承、触发吞噬、16 类物种能力、韧性、精英怪和独立 API 对话。此版本支持原版旋风人和沼骸。
+与 [Fabric 版](../README.md) 相同的 0.4.1 玩法，包括两把剑、升级继承、触发吞噬、16 类物种能力、韧性、精英怪和独立 API 对话。此版本支持原版旋风人和沼骸。
 
 ## 安装
 
 - Minecraft Java **1.21.1**、Java **21**、NeoForge **21.1.251 或更新的 21.1.x**。
-- 客户端与服务器都安装 `thirteen-blade-neoforge-1.21.1-0.4.0.jar`；不装 Fabric API，不与 Fabric 版 JAR 混用。
+- 客户端与服务器都安装 `thirteen-blade-neoforge-1.21.1-0.4.1.jar`；不装 Fabric API，不与 Fabric 版 JAR 混用。
 - 配置：实例内 `config/thirteenblade.json`（玩法）与 `config/thirteenblade-chat.json`（本机对话）。按键 V、J；具体能力及 API 配置见上层 README。
 - 此项目是独立加载器适配，不能直接迁移 Fabric 1.20.1 世界存档。NeoForge 物品使用 1.21 的数据组件保存自定义数据。
 

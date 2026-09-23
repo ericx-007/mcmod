@@ -29,7 +29,7 @@ public final class CarryGameTests implements FabricGameTest {
         skeleton.setHealth(0.1f);
         player.attack(skeleton);
         context.assertTrue(BladeData.kills(sword) == 143 && BladeData.level(sword) == 11, "Offhand melee kill must grow beyond level ten");
-        context.assertTrue(player.getMaxHealth() == 42 && player.getHealth() == 20, "Level eleven grants vitality without healing");
+        context.assertTrue(player.getMaxHealth() == 42 && player.getHealth() == 42, "Level eleven grants vitality and heals to maximum");
         context.assertTrue(player.getStatusEffect(StatusEffects.NIGHT_VISION).isInfinite(), "Offhand activation must absorb the skeleton power");
         BladeData.unlock(sword, BladeData.HUNGER_WARD);
         context.assertTrue(!player.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 200)), "Offhand hunger ward must reject Hunger");

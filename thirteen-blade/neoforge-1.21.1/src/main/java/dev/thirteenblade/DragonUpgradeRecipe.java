@@ -28,6 +28,7 @@ public final class DragonUpgradeRecipe extends CustomRecipe {
             // Transfer only component changes: copying the base sword's defaults would replace
             // the advanced sword's stronger default attribute modifiers.
             result.applyComponents(source.getComponentsPatch());
+            BladeEnchantments.ensure(result, registries);
             return result;
         }
         return ItemStack.EMPTY;

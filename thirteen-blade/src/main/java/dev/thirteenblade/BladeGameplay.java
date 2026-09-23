@@ -87,6 +87,7 @@ public final class BladeGameplay {
         BladeData.addKill(sword);
         refreshAttributes(player);
         if (BladeData.level(sword) > previous) {
+            player.setHealth(player.getMaxHealth());
             player.sendMessage(Text.translatable("message.thirteenblade.level", BladeData.level(sword)), false);
             player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 0.65f, 1.3f);
             player.getServerWorld().spawnParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1,
@@ -190,6 +191,7 @@ public final class BladeGameplay {
 
     public static void refreshAttributes(ServerPlayerEntity player) {
         ItemStack sword = BladeInventory.activeSword(player);
+        BladeEnchantments.ensure(sword);
         boolean active = player.isAlive() && !player.isSpectator() && ThirteenBlade.isSword(sword);
         setModifier(player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE), DAMAGE_ID,
                 "Thirteen Blade growth", active ? BladeData.damageBonus(sword) : 0);
