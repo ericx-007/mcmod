@@ -112,11 +112,11 @@ public final class SwordChat {
                             + (effect.expiresAt() < 0 ? " infinite" : " temporary")).toList()
                 + ". Every " + ThirteenBlade.balance.killsPerLevel + " eligible melee kills grants a level. "
                 + "Growth and powers are stored on this sword. Attack growth and powers work in either hand (main hand takes priority). Max health works anywhere in the inventory, using the strongest sword. The base sword is capped at level ten; upgrading it with a dragon egg preserves all data and removes that cap. Potion effects linger for 5 seconds after putting the sword away. "
-                + "Pressing V arms the next eligible melee kill indefinitely; the cooldown starts only when a kill triggers it. Each newly absorbed hostile family gives two armor toughness while held. "
+                + "The empowered hit multiplies incoming melee damage by ten before armor and steals powers without requiring a kill. Pressing V arms the next eligible melee hit indefinitely; the cooldown starts only when a hit triggers it. Each newly absorbed hostile family gives two armor toughness while held. "
                 + "Absorption unlocks hunger-debuff immunity from zombies, night vision from skeletons, invisibility from spiders, "
-                + "and absorption hearts from creepers. It also steals all non-instant beneficial status effects of the next killed mob, "
+                + "and absorption hearts from creepers. It also steals all non-instant beneficial status effects of the next hit mob, "
                 + "defaulting to infinite duration while equipped. Repeats keep the highest level up to the configured cap. "
-                + "Yellow hearts are consumed by damage; another absorption kill of a creeper or absorption-buffed mob replenishes them. "
+                + "Yellow hearts are consumed by damage; another empowered hit of a creeper or absorption-buffed mob replenishes them. "
                 + "Some naturally spawning monsters become stronger elites with random potion buffs. "
                 + "Hunger immunity does not stop normal food depletion. Equipping never heals the player.";
     }

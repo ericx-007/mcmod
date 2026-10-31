@@ -89,4 +89,24 @@ public final class StrengthGameTests {
         }
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void empoweredHitStealsWithoutKillingAndOnlyTriggersOnce(GameTestHelper h) {
+        var sword = new ItemStack(ThirteenBlade.SWORD.get());
+        var player = BladeGameTests.player(h, sword);
+        var target = EntityType.CREEPER.create(h.getLevel());
+        target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
+        target.setHealth(200);
+        target.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED, 400, 1));
+        BladeGameplay.toggleAbsorption(player);
+        target.hurt(player.damageSources().playerAttack(player), 2);
+        h.assertTrue(target.isAlive() && target.getHealth() == 180, "One hit deals ten times pre-armor damage without killing");
+        h.assertTrue(SoulPower.CREEPER.known(sword) && player.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED), "Living target grants soul and buffs immediately");
+        h.assertTrue(BladeData.kills(sword) == 0 && BladeData.cooldownRemaining(sword, System.currentTimeMillis()) > 0, "Hit starts cooldown without kill progression");
+        var second = EntityType.SKELETON.create(h.getLevel());
+        second.hurt(player.damageSources().playerAttack(player), 2);
+        h.assertTrue(second.getHealth() == 18 && !SoulPower.SKELETON.known(sword), "Following hit is ordinary and cannot absorb again");
+        BladeEffects.release(player);
+        h.succeed();
+    }
 }

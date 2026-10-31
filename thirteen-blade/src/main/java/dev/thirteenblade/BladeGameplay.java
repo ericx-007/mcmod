@@ -94,9 +94,21 @@ public final class BladeGameplay {
                     player.getZ(), 24, 0.5, 0.6, 0.5, 0.2);
         }
 
+        player.getInventory().markDirty();
+        player.currentScreenHandler.sendContentUpdates();
+        sendStatus(player);
+    }
+
+    public static float empoweredHit(LivingEntity victim, DamageSource source, float amount) {
+        if (amount <= 0 || !source.isOf(DamageTypes.PLAYER_ATTACK) || !(source.getAttacker() instanceof ServerPlayerEntity player)
+                || source.getSource() != player || !player.isAlive() || player.isSpectator() || !validVictim(victim)) return amount;
+        ItemStack sword = BladeInventory.activeSword(player);
+        if (!ThirteenBlade.isSword(sword)) return amount;
+        Armed pending = ARMED.get(player.getUuid());
+        if (pending == null || pending.sword != sword) return amount;
         Armed armed = ARMED.get(player.getUuid());
         if (armed != null && armed.sword == sword) {
-            // Consume before awarding: sweeping attacks cannot absorb multiple targets.
+            // Consume before damage: a lethal hit or sweep cannot trigger the skill twice.
             ARMED.remove(player.getUuid());
             BladeData.write(sword).putLong("CooldownUntil", System.currentTimeMillis()
                     + ThirteenBlade.balance.absorptionCooldownSeconds * 1000L);
@@ -141,6 +153,7 @@ public final class BladeGameplay {
         player.getInventory().markDirty();
         player.currentScreenHandler.sendContentUpdates();
         sendStatus(player);
+        return (float) Math.min(Float.MAX_VALUE, (double) amount * 10);
     }
 
     private static long worldTime(ServerPlayerEntity player) {

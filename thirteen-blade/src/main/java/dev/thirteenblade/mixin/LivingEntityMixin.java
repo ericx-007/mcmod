@@ -21,6 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "applyDamage", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private float thirteenblade$empoweredHit(float amount, DamageSource source, float originalAmount) {
+        return dev.thirteenblade.BladeGameplay.empoweredHit((LivingEntity)(Object)this, source, amount);
+    }
+
     @Inject(method = "addStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;Lnet/minecraft/entity/Entity;)Z", at = @At("HEAD"))
     private void thirteenblade$prioritizeExternalPotion(StatusEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this instanceof ServerPlayerEntity player && !BladeEffects.owned(effect)

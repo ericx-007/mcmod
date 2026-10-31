@@ -46,6 +46,8 @@ public final class BladeGameplay {
     private BladeGameplay() {}
 
     public static void register() {
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, (net.minecraftforge.event.entity.living.LivingHurtEvent event) -> event.setAmount(empoweredHit(event.getEntity(), event.getSource(), event.getAmount())));
+
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, (LivingDeathEvent event) -> onDeath(event.getEntity(), event.getSource()));
         MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent event) -> { if (event.phase == TickEvent.Phase.END) tick(event.getServer()); });
         MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
@@ -86,9 +88,21 @@ public final class BladeGameplay {
                     player.getZ(), 24, 0.5, 0.6, 0.5, 0.2);
         }
 
+        player.getInventory().setChanged();
+        player.containerMenu.broadcastChanges();
+        sendStatus(player);
+    }
+
+    public static float empoweredHit(LivingEntity victim, DamageSource source, float amount) {
+        if (amount <= 0 || !source.is(DamageTypes.PLAYER_ATTACK) || !(source.getEntity() instanceof ServerPlayer player)
+                || source.getDirectEntity() != player || !player.isAlive() || player.isSpectator() || !validVictim(victim)) return amount;
+        ItemStack sword = BladeInventory.activeSword(player);
+        if (!ThirteenBlade.isSword(sword)) return amount;
+        Armed pending = ARMED.get(player.getUUID());
+        if (pending == null || pending.sword != sword) return amount;
         Armed armed = ARMED.get(player.getUUID());
         if (armed != null && armed.sword == sword) {
-            // Consume before awarding: sweeping attacks cannot absorb multiple targets.
+            // Consume before damage: a lethal hit or sweep cannot trigger the skill twice.
             ARMED.remove(player.getUUID());
             BladeData.setCooldown(sword, System.currentTimeMillis()
                     + ThirteenBlade.balance.absorptionCooldownSeconds * 1000L);
@@ -133,6 +147,7 @@ public final class BladeGameplay {
         player.getInventory().setChanged();
         player.containerMenu.broadcastChanges();
         sendStatus(player);
+        return (float) Math.min(Float.MAX_VALUE, (double) amount * 10);
     }
 
     private static long worldTime(ServerPlayer player) {

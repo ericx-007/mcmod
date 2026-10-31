@@ -132,4 +132,26 @@ public final class BladeGameTests implements FabricGameTest {
         context.assertTrue(accepted && player.hasStatusEffect(StatusEffects.HUNGER), "Hunger must work normally after unequipping");
         context.complete();
     }
+
+    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    public void empoweredHitStealsWithoutKillingAndOnlyTriggersOnce(TestContext context) throws Exception {
+        var sword = new ItemStack(ThirteenBlade.SWORD);
+        var player = player(context, sword);
+        var target = new net.minecraft.entity.mob.CreeperEntity(EntityType.CREEPER, context.getWorld());
+        target.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(200);
+        target.setHealth(200);
+        target.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 400, 1));
+        var toggle = BladeGameplay.class.getDeclaredMethod("toggleAbsorption", ServerPlayerEntity.class);
+        toggle.setAccessible(true);
+        toggle.invoke(null, player);
+        target.damage(player.getDamageSources().playerAttack(player), 2);
+        context.assertTrue(target.isAlive() && target.getHealth() == 180, "Living target takes ten times damage");
+        context.assertTrue(SoulPower.CREEPER.known(sword) && player.hasStatusEffect(StatusEffects.SPEED), "Steal soul and potion on nonlethal hit");
+        context.assertTrue(BladeData.kills(sword) == 0 && BladeData.cooldownRemaining(sword, System.currentTimeMillis()) > 0, "No kill growth, cooldown starts");
+        var second = new net.minecraft.entity.mob.SkeletonEntity(EntityType.SKELETON, context.getWorld());
+        second.damage(player.getDamageSources().playerAttack(player), 2);
+        context.assertTrue(second.getHealth() == 18 && !SoulPower.SKELETON.known(sword), "Next hit is ordinary");
+        BladeEffects.release(player);
+        context.complete();
+    }
 }

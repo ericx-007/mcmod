@@ -33,6 +33,7 @@ public final class LegacyIntegration {
     @Mod.EventHandler public void started(FMLServerStartedEvent event) {
         net.minecraft.server.MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance(); world = server.getWorld(0);
         try {
+            run("empowered nonlethal hit steals once", this::nonlethal);
             run("growth heals both hands and respects base cap", this::growth);
             run("all twelve available souls and toughness above twenty", this::families);
             run("upgrade preserves NBT without sharing it", this::upgrade);
@@ -211,5 +212,18 @@ public final class LegacyIntegration {
             BladeGameplay.toggleAbsorption(q); world.getWorldInfo().setWorldTotalTime(original + 646); BladeGameplay.toggleAbsorption(q);
             kill(q, new EntitySkeleton(world)); check(!SoulPower.SKELETON.known(cancelled) && BladeData.cooldownRemaining(cancelled, System.currentTimeMillis()) == 0, "cancel is free and does not absorb"); BladeEffects.release(q);
         } finally { world.getWorldInfo().setWorldTotalTime(original); }
+    }
+
+    private void nonlethal() {
+        ItemStack sword = ThirteenBlade.sword(false); FakePlayer p = player(sword, EnumHand.OFF_HAND);
+        EntityCreeper target = new EntityCreeper(world);
+        target.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(200); target.setHealth(200);
+        target.addPotionEffect(new PotionEffect(MobEffects.SPEED, 400, 1));
+        BladeGameplay.toggleAbsorption(p); target.attackEntityFrom(DamageSource.causePlayerDamage(p), 2);
+        check(target.isEntityAlive() && target.getHealth() == 180, "nonlethal hit deals ten times damage");
+        check(SoulPower.CREEPER.known(sword) && p.isPotionActive(MobEffects.SPEED), "steal before death");
+        check(BladeData.kills(sword) == 0 && BladeData.cooldownRemaining(sword, System.currentTimeMillis()) > 0, "cooldown without kill growth");
+        EntitySkeleton second = new EntitySkeleton(world); second.attackEntityFrom(DamageSource.causePlayerDamage(p), 2);
+        check(second.getHealth() == 18 && !SoulPower.SKELETON.known(sword), "skill is consumed once"); BladeEffects.release(p);
     }
 }

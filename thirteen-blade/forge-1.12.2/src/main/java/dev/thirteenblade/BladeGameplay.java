@@ -58,6 +58,9 @@ public final class BladeGameplay {
         if (player != null && event.getAmount() > 0 && SoulPower.VINDICATOR.known(BladeInventory.activeSword(player)))
             event.getEntityLiving().addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 100));
     }
+    @SubscribeEvent(priority = EventPriority.LOWEST) public void empoweredDamage(LivingHurtEvent event) {
+        event.setAmount(empoweredHit(event.getEntityLiving(), event.getSource(), event.getAmount()));
+    }
     private static EntityPlayerMP attacker(DamageSource source) {
         return "player".equals(source.getDamageType()) && source.getTrueSource() instanceof EntityPlayerMP && source.getImmediateSource() == source.getTrueSource()
                 ? (EntityPlayerMP)source.getTrueSource() : null;
@@ -75,6 +78,13 @@ public final class BladeGameplay {
             message(player, "message.thirteenblade.level", BladeData.level(sword));
             player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, net.minecraft.util.SoundCategory.PLAYERS, .65f, 1.3f);
         }
+        player.inventory.markDirty(); player.inventoryContainer.detectAndSendChanges(); sendStatus(player);
+    }
+    public static float empoweredHit(EntityLivingBase victim, DamageSource source, float amount) {
+        EntityPlayerMP player = attacker(source);
+        if (amount <= 0 || player == null || !player.isEntityAlive() || player.isSpectator() || !validVictim(victim)) return amount;
+        ItemStack sword = BladeInventory.activeSword(player);
+        if (!ThirteenBlade.isSword(sword) || ARMED.get(player.getUniqueID()) != sword) return amount;
         if (ARMED.get(player.getUniqueID()) == sword) {
             ARMED.remove(player.getUniqueID());
             BladeData.write(sword).setLong("CooldownUntil", System.currentTimeMillis() + ThirteenBlade.balance.absorptionCooldownSeconds * 1000L);
@@ -97,7 +107,9 @@ public final class BladeGameplay {
             else if (!changed && !refill && !discovered) message(player, "message.thirteenblade.known_power");
         }
         player.inventory.markDirty(); player.inventoryContainer.detectAndSendChanges(); sendStatus(player);
+        return (float) Math.min(Float.MAX_VALUE, (double) amount * 10);
     }
+
     public static void toggleAbsorption(EntityPlayerMP player) {
         if (!player.isEntityAlive() || player.isSpectator()) return;
         long now = tick(player); Long last = LAST_REQUEST.put(player.getUniqueID(), now);

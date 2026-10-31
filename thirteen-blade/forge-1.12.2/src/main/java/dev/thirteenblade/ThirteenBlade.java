@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = ThirteenBlade.ID, name = "Thirteen Blade", version = "0.4.1", acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:forge@[14.23.5.2847,)")
+@Mod(modid = ThirteenBlade.ID, name = "Thirteen Blade", version = "0.5.0", acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:forge@[14.23.5.2847,)")
 public final class ThirteenBlade {
     public static final String ID = "thirteenblade";
     public static final Logger LOGGER = LogManager.getLogger(ID);

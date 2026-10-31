@@ -1,12 +1,12 @@
 # 十三契刃 · Forge 1.12.2
 
-面向 RLCraft 2.9.3 的 Java 8 移植版，玩法版本为 0.4.1。使用 Forge 14.23.5.2847 的开发接口编译，正式 JAR 在 RLCraft 所用 **14.23.5.2860** 上验证。MIT 协议覆盖源码及随附原创贴图。
+面向 RLCraft 2.9.3 的 Java 8 移植版，玩法版本为 0.5.0。使用 Forge 14.23.5.2847 的开发接口编译，正式 JAR 在 RLCraft 所用 **14.23.5.2860** 上验证。MIT 协议覆盖源码及随附原创贴图。
 
 ## 安装
 
-将 `build/libs/thirteen-blade-forge-1.12.2-0.4.1.jar` 放入游戏实例的 `mods` 文件夹。联机时客户端和服务器都要安装同一版本。不要安装 `-dev.jar`、`-sources.jar`、`-integration-tests.jar` 或 `-integration-tests-obf.jar`，不要混入其他加载器或游戏版本的本模组。
+将 `build/libs/thirteen-blade-forge-1.12.2-0.5.0.jar` 放入游戏实例的 `mods` 文件夹。联机时客户端和服务器都要安装同一版本。不要安装 `-dev.jar`、`-sources.jar`、`-integration-tests.jar` 或 `-integration-tests-obf.jar`，不要混入其他加载器或游戏版本的本模组。
 
-V 准备 / 取消下一次吞噬，J 打开私人剑灵对话。在 RLCraft 中如有按键冲突，请在控制设置中重绑。
+V 准备 / 取消下一次吞噬命中，J 打开私人剑灵对话。在 RLCraft 中如有按键冲突，请在控制设置中重绑。
 
 ## 旧版差异
 
@@ -42,3 +42,6 @@ RetroFuturaGradle 1.4.2 会准备旧版源码与映射；正式输出是无 `-de
 测试使用本项目 `run/world`，结束后自动关闭服务器；不要将自己的存档放入此开发目录。结果见 `run/thirteenblade-integration-results.txt`，Gradle 随后检查场景结果，失败则构建失败。测试源码位于 `src/integration`，不会装入正式 JAR。`reobfIntegrationJar` 生成可供正式混淆环境验证的独立测试模组。
 
 完整验证范围和未完成的人工试玩见 [测试记录](../docs/TESTING.md) 与 [整合包适配说明](../docs/MODPACK_COMPATIBILITY.md)。
+
+
+0.5.0 吞噬规则：按 V 无限期待命，下一次有效近战命中将该次伤害乘以 10，并立即掠夺刻印和正面药水效果，目标无需死亡。仍经过护甲、抗性和其他模组的伤害结算。触发后冷却 60 秒；普通击杀成长规则保持每 13 次击杀一级。无效目标和远程攻击不消耗待命。
